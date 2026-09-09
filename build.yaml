@@ -4,7 +4,7 @@ guid: "8f3c1a2e-4b7d-4e5f-9c1a-2e4b7d4e5f9c"
 version: "1.0.0.0"
 targetAbi: "10.11.0.0"
 framework: "net8.0"
-owner: "DragoPrime"
+owner: "PUNE-AICI-USERNAME-UL-TAU-DE-GITHUB"
 overview: "Traduce automat descrieri, genuri si etichete in limba romana folosind Ollama."
 description: >
   Plugin Jellyfin care se conecteaza la un server Ollama local (ex: qwen3:8b) si traduce
