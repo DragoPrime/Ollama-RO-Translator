@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ollama RO Translator</title>
+</head>
+<body>
+<div id="OllamaTranslatorConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            <form id="OllamaTranslatorConfigForm">
+                <div class="verticalSection">
+                    <h2>Ollama RO Translator</h2>
+                    <p>
+                        Traduce automat descrierile, genurile si etichetele continutului in limba romana,
+                        folosind un server Ollama local, si blocheaza campurile traduse ca sa nu fie
+                        suprascrise la refresh-ul automat de metadate.
+                    </p>
+                </div>
+
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="OllamaUrl">URL server Ollama</label>
+                    <input id="OllamaUrl" name="OllamaUrl" type="text" is="emby-input" />
+                    <div class="fieldDescription">
+                        Ex: http://192.168.1.10:11434 - foloseste adresa IP reala a serverului/containerului
+                        unraid pe care ruleaza Ollama (nu "localhost", daca Jellyfin e in alt container).
+                    </div>
+                </div>
+
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="ModelName">Model Ollama</label>
+                    <input id="ModelName" name="ModelName" type="text" is="emby-input" />
+                    <div class="fieldDescription">Ex: qwen3:8b</div>
+                </div>
+
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="RequestTimeoutSeconds">Timeout cerere (secunde)</label>
+                    <input id="RequestTimeoutSeconds" name="RequestTimeoutSeconds" type="number" is="emby-input" min="10" />
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label>
+                        <input id="TranslateOverview" name="TranslateOverview" type="checkbox" is="emby-checkbox" />
+                        <span>Tradu descrierile (Overview)</span>
+                    </label>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label>
+                        <input id="TranslateGenres" name="TranslateGenres" type="checkbox" is="emby-checkbox" />
+                        <span>Tradu genurile</span>
+                    </label>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label>
+                        <input id="TranslateTags" name="TranslateTags" type="checkbox" is="emby-checkbox" />
+                        <span>Tradu etichetele (Tags)</span>
+                    </label>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label>
+                        <input id="LockFieldsAfterTranslation" name="LockFieldsAfterTranslation" type="checkbox" is="emby-checkbox" />
+                        <span>Blocheaza campurile dupa traducere (recomandat)</span>
+                    </label>
+                    <div class="fieldDescription">
+                        Impiedica refresh-ul automat de metadate (ex. cel la 30 de zile) sa suprascrie
+                        traducerea cu textul original in engleza. Titlurile nu sunt niciodata modificate
+                        de acest plugin, indiferent de aceasta setare.
+                    </div>
+                </div>
+
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                        <span>Salveaza</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    (function () {
+        var pluginUniqueId = '8f3c1a2e-4b7d-4e5f-9c1a-2e4b7d4e5f9c';
+
+        document.querySelector('#OllamaTranslatorConfigPage')
+            .addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginUniqueId).then(function (config) {
+                    document.querySelector('#OllamaUrl').value = config.OllamaUrl || '';
+                    document.querySelector('#ModelName').value = config.ModelName || '';
+                    document.querySelector('#RequestTimeoutSeconds').value = config.RequestTimeoutSeconds || 120;
+                    document.querySelector('#TranslateOverview').checked = !!config.TranslateOverview;
+                    document.querySelector('#TranslateGenres').checked = !!config.TranslateGenres;
+                    document.querySelector('#TranslateTags').checked = !!config.TranslateTags;
+                    document.querySelector('#LockFieldsAfterTranslation').checked = !!config.LockFieldsAfterTranslation;
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+        document.querySelector('#OllamaTranslatorConfigForm')
+            .addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginUniqueId).then(function (config) {
+                    config.OllamaUrl = document.querySelector('#OllamaUrl').value;
+                    config.ModelName = document.querySelector('#ModelName').value;
+                    config.RequestTimeoutSeconds = parseInt(document.querySelector('#RequestTimeoutSeconds').value, 10) || 120;
+                    config.TranslateOverview = document.querySelector('#TranslateOverview').checked;
+                    config.TranslateGenres = document.querySelector('#TranslateGenres').checked;
+                    config.TranslateTags = document.querySelector('#TranslateTags').checked;
+                    config.LockFieldsAfterTranslation = document.querySelector('#LockFieldsAfterTranslation').checked;
+
+                    ApiClient.updatePluginConfiguration(pluginUniqueId, config).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+                });
+                return false;
+            });
+    })();
+</script>
+</body>
+</html>
